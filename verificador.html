@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificador de enlaces — AntiEstafa</title>
+<meta name="description" content="Analizá enlaces sospechosos en segundos, gratis y sin registro. AntiEstafa te dice si un link es seguro, dudoso o peligroso.">
+<style>
+  :root{
+    --midnight:#0A1A2F; --navy:#132E4F; --gold:#C6A15B; --gold-soft:#E9DCC0;
+    --ivory:#FAF8F3; --ink:#14202E; --slate:#5B6B7A;
+    --emerald:#0E9F6E; --amber:#D97706; --red:#C0392B;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);background:var(--ivory);color:var(--ink);line-height:1.6}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(10,26,47,.94);backdrop-filter:blur(10px);border-bottom:1px solid rgba(198,161,91,.25)}
+  nav .wrap{display:flex;align-items:center;gap:12px;padding-top:14px;padding-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .brand span{color:#fff;font-size:13px;letter-spacing:4px;font-weight:600}
+  nav a.back{margin-left:auto;color:#C9D4E0;text-decoration:none;font-size:14px}
+  nav a.back:hover{color:var(--gold)}
+  header.hero{background:var(--midnight);color:#fff;padding:130px 0 70px;text-align:center}
+  .eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;margin-bottom:14px}
+  h1{font-family:var(--serif);font-size:clamp(32px,5vw,50px);line-height:1.15;font-weight:400}
+  h1 em{color:var(--gold);font-style:italic}
+  .lead{color:#C9D4E0;max-width:620px;margin:16px auto 0;font-size:17px}
+  .card{background:#fff;border:1px solid #E7E0D2;border-radius:18px;padding:34px;margin:-34px auto 0;position:relative;box-shadow:0 18px 50px rgba(10,26,47,.10);max-width:860px}
+  .urlrow{display:flex;gap:12px;flex-wrap:wrap}
+  input[type=url],input[type=text]{flex:1;min-width:220px;font-size:16px;padding:15px 18px;border:2px solid #E7E0D2;border-radius:12px;font-family:var(--sans);color:var(--ink)}
+  input:focus{outline:none;border-color:var(--gold)}
+  .btn{background:var(--gold);color:var(--midnight);font-weight:700;font-size:16px;padding:15px 30px;border:none;border-radius:12px;cursor:pointer}
+  .btn:hover{filter:brightness(1.06)}
+  .samples{margin-top:14px;font-size:13px;color:var(--slate)}
+  .samples button{background:none;border:none;color:var(--navy);text-decoration:underline;cursor:pointer;font-size:13px;padding:0 4px}
+  #results{margin-top:8px;display:none}
+  .verdict{border-radius:14px;padding:26px;text-align:center;margin:26px 0 8px}
+  .verdict h2{font-family:var(--serif);font-size:30px;margin-bottom:6px;font-weight:400}
+  .verdict p{font-size:15px;max-width:560px;margin:0 auto}
+  .v-safe{background:#E6F7EF;border:2px solid var(--emerald)}
+  .v-safe h2{color:var(--emerald)}
+  .v-warn{background:#FDF3E3;border:2px solid var(--amber)}
+  .v-warn h2{color:var(--amber)}
+  .v-danger{background:#FBEDEA;border:2px solid var(--red)}
+  .v-danger h2{color:var(--red)}
+  .bar{height:10px;background:#EFE9DA;border-radius:99px;overflow:hidden;margin:18px 0 4px}
+  .bar i{display:block;height:100%;border-radius:99px;transition:width .6s}
+  .findings{list-style:none;margin:18px 0}
+  .findings li{display:flex;gap:12px;align-items:flex-start;padding:13px 4px;border-bottom:1px solid #F0EADC;font-size:15px}
+  .findings li:last-child{border-bottom:none}
+  .ico{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+  .ico.ok{background:var(--emerald)} .ico.warn{background:var(--amber)} .ico.danger{background:var(--red)}
+  .advice{background:var(--midnight);color:#fff;border-radius:14px;padding:26px;margin:26px 0}
+  .advice h3{font-family:var(--serif);font-weight:400;font-size:22px;color:var(--gold);margin-bottom:10px}
+  .advice ul{margin-left:20px;font-size:15px;color:#D7E0EA}
+  .advice li{margin-bottom:6px}
+  .note{background:#F5F0E4;border-radius:12px;padding:18px 20px;font-size:13.5px;color:var(--slate);margin:26px 0}
+  .host{font-size:13px;color:var(--slate);margin-top:14px;word-break:break-all}
+  .host b{color:var(--ink)}
+  section{padding:60px 0}
+  footer{background:var(--midnight);color:#8FA0B3;font-size:13px;padding:30px 0;text-align:center}
+  footer a{color:#C9D4E0;text-decoration:none;margin:0 10px}
+  footer a:hover{color:var(--gold)}
+  @media(max-width:640px){.card{padding:22px}.urlrow .btn{width:100%}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="index.html"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>ANTIESTafa</span></a>
+  <a class="back" href="index.html">← Volver al inicio</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">100% GRATIS · SIN REGISTRO</div>
+  <h1>Verificá un enlace <em>antes de hacer clic</em></h1>
+  <p class="lead">Pegá el link dudoso que te llegó por WhatsApp, SMS o email. Lo analizamos con más de 20 señales de riesgo y te damos un veredicto claro en segundos. Todo ocurre en tu navegador: no guardamos nada.</p>
+</div></header>
+
+<div class="wrap"><div class="card">
+  <div class="urlrow">
+    <input type="text" id="url" placeholder="Pegá el enlace aquí, por ejemplo: https://ejemplo.com/oferta" autocomplete="off" spellcheck="false">
+    <button class="btn" id="go">Analizar</button>
+  </div>
+  <div class="samples">¿Querés probar? <button id="ex-bad">Ver ejemplo sospechoso</button> · <button id="ex-good">Ver ejemplo seguro</button></div>
+  <div id="results"></div>
+</div></div>
+
+<section><div class="wrap">
+  <div class="note"><strong>Importante:</strong> esta herramienta es orientativa. Detecta patrones típicos de phishing, pero ningún sistema es infalible y los estafadores cambian de tácticas todo el tiempo. Ante la duda, no ingreses datos personales ni bancarios y verificá por otro canal (llamando vos al número oficial, por ejemplo).</div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>© 2026 AntiEstafa · Todos los derechos reservados</div>
+  <div style="margin-top:8px"><a href="index.html">Inicio</a><a href="terminos.html">Términos</a><a href="privacidad.html">Privacidad</a></div>
+</div></footer>
+
+<script>
+(function(){
+  var RISKY_TLDS = ['tk','ml','ga','cf','gq','xyz','top','click','link','buzz','monster','rest','bar','party','stream','download','win','bid','cricket','date','faith','gdn','loan','men','kim','okinawa','review','country','science','accountant'];
+  var SHORTENERS = ['bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','is.gd','buff.ly','cutt.ly','rb.gy','shorturl.at','tiny.cc','bitly.com','rebrand.ly','soo.gd','s.id'];
+  var BRANDS = {paypal:'paypal.com', mercadopago:'mercadopago.com', netflix:'netflix.com', instagram:'instagram.com', facebook:'facebook.com', whatsapp:'whatsapp.com', afip:'afip.gob.ar', anses:'anses.gob.ar', gmail:'google.com', google:'google.com', apple:'apple.com', amazon:'amazon.com', visa:'visa.com', mastercard:'mastercard.com'};
+  var LURES = ['verific','validar','suspend','premio','ganador','ganaste','gratis','login','signin','actualiz','seguridad','alerta','urgente','confirmar','cuenta-bloqueada','reclam'];
+  var REDIR_PARAMS = ['url=','redirect=','redir=','next=','return=','dest=','r=','u=','continue=','to='];
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  function analyze(raw){
+    var findings = [];
+    var t = raw.trim();
+    if(!t){ return {error:'Pegá un enlace para analizarlo.'}; }
+    var hadScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(t);
+    if(!hadScheme) findings.push({l:'warn', t:'El enlace no incluye protocolo (https://). Lo analizamos como si fuera https, pero un link serio siempre lo muestra completo.'});
+    var scheme = (t.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/)||[])[1] || '';
+    if(scheme && !/^(https?)$/i.test(scheme)){
+      if(/^(javascript|data|vbscript)$/i.test(scheme)) findings.push({l:'danger', t:'Esquema "'+scheme+'" extremadamente peligroso: puede ejecutar código en tu dispositivo. No lo abras.'});
+      else findings.push({l:'warn', t:'Protocolo inusual ("'+scheme+'"). Los sitios legítimos usan https.'});
+    }
+    var work = hadScheme ? t : 'https://' + t;
+    var u;
+    try { u = new URL(work); }
+    catch(e){ return {error:'No pudimos interpretar ese texto como un enlace válido.'}; }
+    var host = u.hostname.toLowerCase();
+    var path = (u.pathname + u.search + u.hash).toLowerCase();
+
+    if(u.protocol === 'http:') findings.push({l:'warn', t:'Usa http sin cifrado: los datos que ingreses viajarían sin protección. Los sitios serios usan https.'});
+    if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host) || /^\[[0-9a-f:]+\]$/i.test(host)) findings.push({l:'danger', t:'El destino es una dirección IP numérica en vez de un dominio. Típico de sitios truchos temporales.'});
+    if(host.indexOf('xn--') !== -1) findings.push({l:'danger', t:'El dominio usa caracteres codificados (punycode): puede estar imitando visualmente a un sitio conocido.'});
+    if(/[^\x00-\x7F]/.test(host)) findings.push({l:'danger', t:'El dominio contiene caracteres no latinos: posible ataque homógrafo (letras que parecen iguales pero no lo son).'});
+    var tld = host.split('.').pop();
+    if(RISKY_TLDS.indexOf(tld) !== -1) findings.push({l:'warn', t:'La terminación .'+tld+' es muy usada por sitios fraudulentos por ser barata y poco controlada.'});
+    if(SHORTENERS.indexOf(host.replace(/^www\./,'')) !== -1) findings.push({l:'warn', t:'Es un acortador de URL: oculta el destino real. Expandilo o no hagas clic.'});
+    var subs = host.split('.').length - 2;
+    if(subs >= 4) findings.push({l:'warn', t:'Tiene '+subs+' subdominios: los estafadores los usan para disfrazar el dominio real.'});
+    var domainCore = host.split('.').slice(0,-1).join('.');
+    if(domainCore.length > 30) findings.push({l:'warn', t:'Dominio inusualmente largo ('+domainCore.length+' caracteres). Los sitios oficiales suelen ser cortos.'});
+    var hyphens = (domainCore.match(/-/g)||[]).length;
+    if(hyphens >= 3) findings.push({l:'warn', t:'El dominio tiene '+hyphens+' guiones: patrón común en imitaciones (ej. "banco-seguro-online").'});
+    if(t.indexOf('@') !== -1) findings.push({l:'danger', t:'La URL contiene "@": todo lo anterior al @ se ignora y el destino real es lo que sigue. Engaño clásico.'});
+    if(u.port && u.port !== '80' && u.port !== '443') findings.push({l:'warn', t:'Usa un puerto no estándar (:'+u.port+'). Los sitios normales no lo necesitan.'});
+    // marcas
+    var brandHit = null;
+    for(var b in BRANDS){
+      if((host+path).indexOf(b) !== -1 && host.indexOf(BRANDS[b]) === -1){ brandHit = b; break; }
+    }
+    if(brandHit) findings.push({l:'danger', t:'Menciona "'+brandHit+'" pero el dominio no es el oficial ('+BRANDS[brandHit]+'). Señal fuerte de suplantación de identidad.'});
+    if(host.indexOf('banco') !== -1) findings.push({l:'warn', t:'Menciona "banco": verificá que sea exactamente el sitio oficial de tu banco, letra por letra.'});
+    var lure = LURES.filter(function(w){ return (host+path).indexOf(w) !== -1; });
+    if(lure.length) findings.push({l:'warn', t:'Contiene palabras típicas de engaño: "'+lure.slice(0,3).join('", "')+'". Buscan apurarte para que actúes sin pensar.'});
+    var redir = REDIR_PARAMS.filter(function(w){ return path.indexOf(w) !== -1; });
+    if(redir.length) findings.push({l:'warn', t:'Incluye parámetros de redirección: el link puede llevarte a otro sitio distinto del que parece.'});
+    if(t.length > 150) findings.push({l:'warn', t:'URL muy larga ('+t.length+' caracteres): a veces se usa para ocultar el destino real.'});
+    if(/\.(pdf|doc|docx|xls|zip|rar)\.(exe|js|bat|msi|scr|com)$/.test(path)) findings.push({l:'danger', t:'Doble extensión engañosa en el archivo: parece un documento pero es un programa. No lo descargues.'});
+    if(/[a-zA-Z][0-9]|[0-9][a-zA-Z]/.test(domainCore) && /(payp|g[o0]{2}gl|micros|appl|banc)/.test(domainCore)) findings.push({l:'danger', t:'El dominio mezcla letras y números imitando una marca conocida (ej. "paypa1"). Típico de phishing.'});
+    var params = (u.search.match(/=/g)||[]).length;
+    if(params >= 5) findings.push({l:'warn', t:'Tiene muchos parámetros ('+params+'): puede estar armando una redirección encadenada.'});
+
+    var score = 0, dangers = 0;
+    findings.forEach(function(f){ if(f.l==='danger'){dangers++; score+=3;} else if(f.l==='warn'){score+=1;} });
+    var verdict, cls, msg;
+    if(dangers >= 2 || score >= 6){ verdict='Riesgo alto'; cls='v-danger'; msg='Este enlace muestra varias señales típicas de estafa. No lo abras, no ingreses datos y no descargues nada.'; }
+    else if(dangers === 1 || score >= 1){ verdict='Precaución'; cls='v-warn'; msg='Este enlace tiene señales que ameritan cuidado. No ingreses datos personales ni bancarios hasta verificarlo por otro canal.'; }
+    else { verdict='Seguro'; cls='v-safe'; msg='No detectamos señales de riesgo en este enlace. Igual, mantené los hábitos: revisá siempre el remitente antes de actuar.'; findings.push({l:'ok', t:'Sin señales de riesgo detectadas en el análisis.'}); }
+
+    return {host:host, findings:findings, verdict:verdict, cls:cls, msg:msg, score:Math.min(score, 30)};
+  }
+
+  var ADVICE = {
+    'Seguro': ['Podés continuar con normalidad, pero nunca está de más revisar quién te envió el link.', 'Desconfiá si te piden datos urgentes aunque el link parezca bien.'],
+    'Precaución': ['No ingreses contraseñas, datos bancarios ni códigos que te lleguen por SMS.', 'Verificá por otro canal: llamá vos al número oficial o escribí la dirección a mano en el navegador.', 'Si te lo mandó un desconocido, bloquealo y reportalo.'],
+    'Riesgo alto': ['No abras el enlace ni descargues archivos.', 'No ingreses ningún dato: ni contraseñas, ni tarjetas, ni códigos de verificación.', 'Bloqueá al remitente y reportalo en WhatsApp o a tu banco si se hizo pasar por él.', 'Si ya ingresaste datos, cambiá tus contraseñas y avisá a tu banco cuanto antes.']
+  };
+
+  function render(r){
+    var box = document.getElementById('results');
+    if(r.error){ box.style.display='block'; box.innerHTML = '<div class="verdict v-warn"><h2>Revisá el enlace</h2><p>'+esc(r.error)+'</p></div>'; return; }
+    var pct = Math.round(r.score/30*100);
+    var color = r.cls==='v-safe' ? 'var(--emerald)' : (r.cls==='v-warn' ? 'var(--amber)' : 'var(--red)');
+    var html = '<div class="host">Analizando: <b>'+esc(r.host)+'</b></div>';
+    html += '<div class="verdict '+r.cls+'"><h2>'+r.verdict+'</h2><p>'+esc(r.msg)+'</p>';
+    html += '<div class="bar"><i style="width:'+pct+'%;background:'+color+'"></i></div></div>';
+    html += '<ul class="findings">';
+    r.findings.forEach(function(f){
+      var icon = f.l==='ok' ? '✓' : (f.l==='warn' ? '!' : '✕');
+      html += '<li><span class="ico '+f.l+'">'+icon+'</span><span>'+esc(f.t)+'</span></li>';
+    });
+    html += '</ul><div class="advice"><h3>Qué hacer ahora</h3><ul>';
+    ADVICE[r.verdict].forEach(function(a){ html += '<li>'+esc(a)+'</li>'; });
+    html += '</ul></div>';
+    box.style.display='block';
+    box.innerHTML = html;
+    box.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  document.getElementById('go').addEventListener('click', function(){ render(analyze(document.getElementById('url').value)); });
+  document.getElementById('url').addEventListener('keydown', function(e){ if(e.key==='Enter') render(analyze(this.value)); });
+  document.getElementById('ex-bad').addEventListener('click', function(){
+    document.getElementById('url').value = 'http://banco-seguro.tk@192.168.1.10/login?u=abc123';
+    render(analyze(document.getElementById('url').value));
+  });
+  document.getElementById('ex-good').addEventListener('click', function(){
+    document.getElementById('url').value = 'https://www.mercadopago.com.ar/ayuda';
+    render(analyze(document.getElementById('url').value));
+  });
+})();
+</script>
+</body>
+</html>
